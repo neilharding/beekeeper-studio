@@ -14,11 +14,13 @@ import { UserSetting } from "@/common/appdb/models/user_setting";
 import semver from "semver";
 import { NotFoundPluginError, NotFoundPluginViewError, NotSupportedPluginError } from "./errors";
 import { isManifestV0, mapViewsAndMenuFromV0ToV1 } from "./utils";
+import EventEmitter from "events";
 
 const log = rawLog.scope("PluginManager");
 
 export type PluginManagerOptions = {
-  fileManager?: PluginFileManager;
+  fileManager: PluginFileManager;
+  /** You probably don't need to pass this. It's available for testing. */
   registry?: PluginRegistry;
   appVersion: string;
 }
@@ -27,9 +29,11 @@ export default class PluginManager {
   private initialized = false;
   private registry: PluginRegistry;
   private fileManager: PluginFileManager;
+  /** A list of installed plugins */
   private plugins: PluginContext[] = [];
   pluginSettings: PluginSettings = {};
   private pluginLocks: string[] = [];
+  private emitter = new EventEmitter();
 
   /** A Constant for the setting key */
   private static readonly PLUGIN_SETTINGS = "pluginSettings";
@@ -70,7 +74,9 @@ export default class PluginManager {
         continue;
       }
 
-      await this.installPlugin(id);
+      await this.installPlugin(id).catch((e) => {
+        log.error(`Failed to install preinstalled plugin "${id}"`, e);
+      });
     }
 
 
@@ -79,7 +85,9 @@ export default class PluginManager {
         this.pluginSettings[plugin.id]?.autoUpdate &&
         (await this.checkForUpdates(plugin.id))
       ) {
-        await this.updatePlugin(plugin.id);
+        await this.updatePlugin(plugin.id).catch((e) => {
+          log.error(`Failed to update plugin "${plugin.id}"`, plugin, e);
+        });
       }
     }
   }
@@ -127,6 +135,7 @@ export default class PluginManager {
     return await this.registry.getRepository(pluginId);
   }
 
+  /** Get the list of installed plugins */
   getPlugins(): PluginContext[] {
     this.initializeGuard();
     return this.plugins;
@@ -144,6 +153,8 @@ export default class PluginManager {
   /** Install the latest version of a plugin. */
   async installPlugin(id: string): Promise<Manifest> {
     this.initializeGuard();
+
+    this.emitter.emit("beforeInstallPlugin", id);
 
     let update = false;
 
@@ -318,5 +329,12 @@ export default class PluginManager {
 
   get isInitialized() {
     return this.initialized;
+  }
+
+  on(
+    _name: "beforeInstallPlugin",
+    callback: (...args: Parameters<PluginManager['installPlugin']>) => void
+  ) {
+    this.emitter.on("beforeInstallPlugin", callback);
   }
 }
