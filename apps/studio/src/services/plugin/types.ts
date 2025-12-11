@@ -180,7 +180,7 @@ export type PluginSettings = {
   }
 }
 
-
+/** Used in frontend */
 export type WebPluginContext = {
   manifest: Manifest;
   store: PluginStoreService;
@@ -188,18 +188,23 @@ export type WebPluginContext = {
   log: ReturnType<typeof rawLog.scope>;
   appVersion: string;
   fileHelpers: FileHelpers;
-  noty: {
+noty: {
     success(text: string, options?: any): Noty;
     error(text: string, options?: any): Noty;
     warning(text: string, options?: any): Noty;
     info(text: string, options?: any): Noty;
   };
   confirm(title?: string, message?: string, options?: { confirmLabel?: string, cancelLabel?: string }): Promise<boolean>;
+  disabled: boolean;
 }
 
+/** Used in backend */
 export type PluginContext = {
   manifest: Manifest;
+  /** @alias compatible */
   loadable: boolean;
+  compatible: boolean;
+  disabled: boolean;
 }
 
 export type WebPluginManagerStatus = "initializing" | "ready" | "failed-to-initialize";

@@ -358,6 +358,9 @@ declare interface IBksConfig {
         "bks-ai-shell": {
             disabled: boolean;
         };
+        "bks-er-diagram": {
+            disabled: boolean;
+        };
     };
     security: {
         disconnectOnIdle: boolean;
