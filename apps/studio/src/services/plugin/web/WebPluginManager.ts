@@ -1,6 +1,6 @@
 import type { UtilityConnection } from "@/lib/utility/UtilityConnection";
 import rawLog from "@bksLogger";
-import { Manifest, OnViewRequestListener, PluginContext } from "../types";
+import { Manifest, OnViewRequestListener, PluginSettings, TransportPlugin } from "../types";
 import PluginStoreService from "./PluginStoreService";
 import WebPluginLoader from "./WebPluginLoader";
 import { ContextOption } from "@/plugins/BeekeeperPlugin";
@@ -12,6 +12,7 @@ import { WebPluginCommandExecutor } from "./WebPluginCommandExecutor";
 const log = rawLog.scope("WebPluginManager");
 
 export type WebPluginManagerParams = {
+  config?: PluginSettings;
   utilityConnection: UtilityConnection;
   pluginStore: PluginStoreService;
   appVersion: string;
@@ -49,7 +50,7 @@ export type WebPluginManagerParams = {
  * For more info about a plugin, use `pluginOf`.
  */
 export default class WebPluginManager {
-  plugins: PluginContext[] = [];
+  plugins: TransportPlugin[] = [];
   /** A map of plugin id -> loader */
   loaders: Map<string, WebPluginLoader> = new Map();
 
@@ -82,15 +83,15 @@ export default class WebPluginManager {
       "plugin/plugins"
     );
 
-    for (const { loadable, manifest } of this.plugins) {
-      if (!loadable) {
-        log.warn(`Plugin "${manifest.id}" is not loadable. Skipping...`);
+    for (const transport of this.plugins) {
+      if (!transport.loadable) {
+        log.warn(`Plugin "${transport.manifest.id}" is not loadable. Skipping...`);
         continue;
       }
       try {
-        await this.loadPlugin(manifest);
+        await this.loadPlugin(transport);
       } catch (e) {
-        log.error(`Failed to load plugin: ${manifest.id}`, e);
+        log.error(`Failed to load plugin: ${transport.manifest.id}`, e);
       }
     }
 
@@ -104,21 +105,21 @@ export default class WebPluginManager {
 
   /** Install a plugin by its id */
   async install(id: string) {
-    const manifest = await this.utilityConnection.send("plugin/install", {
+    const transport: TransportPlugin = await this.utilityConnection.send("plugin/install", {
       id,
     });
-    await this.loadPlugin(manifest);
-    this.plugins.push({ manifest, loadable: true, disabled: false });
-    return manifest;
+    await this.loadPlugin(transport);
+    this.plugins.push(transport);
+    return transport.manifest;
   }
 
   /** Update a plugin by its id */
   async update(id: string) {
-    const manifest = await this.utilityConnection.send("plugin/update", {
+    const transport: TransportPlugin = await this.utilityConnection.send("plugin/update", {
       id,
     });
     await this.reloadPlugin(id);
-    return manifest;
+    return transport.manifest;
   }
 
   /** Uninstall a plugin by its id */
@@ -259,7 +260,7 @@ export default class WebPluginManager {
     return loader.onDispose(fn);
   }
 
-  execute(pluginId: string, command: string) {
+execute(pluginId: string, command: string) {
     const loader = this.loaders.get(pluginId);
     if (!loader) {
       throw new Error(
@@ -271,25 +272,25 @@ export default class WebPluginManager {
   }
 
 
-  private async loadPlugin(manifest: Manifest) {
-    if (this.loaders.has(manifest.id)) {
-      log.warn(`Plugin "${manifest.id}" already loaded. Skipping...`);
-      return this.loaders.get(manifest.id);
+  private async loadPlugin(transport: TransportPlugin) {
+    if (this.loaders.has(transport.manifest.id)) {
+      log.warn(`Plugin "${transport.manifest.id}" already loaded. Skipping...`);
+      return this.loaders.get(transport.manifest.id);
     }
 
     const loader = new WebPluginLoader({
-      manifest,
+      manifest: transport.manifest,
       store: this.pluginStore,
       utility: this.utilityConnection,
-      log: rawLog.scope(`Plugin:${manifest.id}`),
+      log: rawLog.scope(`Plugin:${transport.manifest.id}`),
       appVersion: this.appVersion,
       fileHelpers: this.fileHelpers,
 noty: this.noty,
       confirm: this.confirm,
-      disabled: window.bksConfig.plugins[manifest.id]?.disabled,
+      disabled: transport.disabled,
     });
     await loader.load();
-    this.loaders.set(manifest.id, loader);
+    this.loaders.set(transport.manifest.id, loader);
     return loader;
   }
 

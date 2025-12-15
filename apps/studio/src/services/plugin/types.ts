@@ -180,8 +180,7 @@ export type PluginSettings = {
   }
 }
 
-/** Used in frontend */
-export type WebPluginContext = {
+export type WebPluginLoaderContext = {
   manifest: Manifest;
   store: PluginStoreService;
   utility: UtilityConnection;
@@ -198,8 +197,7 @@ noty: {
   disabled: boolean;
 }
 
-/** Used in backend */
-export type PluginContext = {
+export type TransportPlugin = {
   manifest: Manifest;
   /** @alias compatible */
   loadable: boolean;
@@ -211,6 +209,7 @@ export type WebPluginManagerStatus = "initializing" | "ready" | "failed-to-initi
 
 export type WebPluginViewInstance = {
   iframe: HTMLIFrameElement;
+  /** For `getViewContext` API */
   context: any;
 }
 
