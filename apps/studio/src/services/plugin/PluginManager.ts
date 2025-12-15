@@ -18,7 +18,10 @@ import { isManifestV0, mapViewsAndMenuFromV0ToV1 } from "./utils";
 const log = rawLog.scope("PluginManager");
 
 export type PluginManagerOptions = {
-  config?: PluginSettings;
+  /** Per-plugin configuration, keyed by plugin ID. */
+  pluginSettings?: PluginSettings;
+  /** @todo Settings that apply to the plugin system as a whole. */
+  systemSettings?: unknown;
   fileManager: PluginFileManager;
   /** You probably don't need to pass this. It's available for testing. */
   registry?: PluginRegistry;
@@ -331,8 +334,8 @@ export default class PluginManager {
 
     const compatible = this.checkCompatibility(manifest);
 
-    let disabled = typeof this.options.config?.plugins[manifest.id]?.disabled === "boolean"
-      ? this.options.config?.plugins[manifest.id]?.disabled
+    const disabled = typeof this.options.pluginSettings?.[manifest.id]?.disabled === "boolean"
+      ? this.options.pluginSettings?.[manifest.id]?.disabled
       : false;
 
     const context = this.applyPluginContextTransformers({
