@@ -219,3 +219,28 @@ export type CreatePluginTabOptions = {
   params?: JsonValue;
   command: string;
 };
+
+export type UIPlugin = {
+  /** Plugin is made by Beekeeper Studio */
+  readonly officialPlugin: boolean;
+
+  // Infos that are available from plugins.json
+  id: Manifest['id'];
+  name: Manifest['name'];
+  author: Manifest['author'];
+  description: Manifest['description'];
+
+  compatible?: boolean;
+  /** @alias compatible */
+  loadable?: boolean;
+  installed: boolean;
+  installing: boolean;
+
+  updateAvailable: boolean;
+  checkingForUpdates: null | boolean;
+
+  disabled: boolean;
+  minAppVersion?: Manifest['minAppVersion'];
+  repo?: string;
+  error?: Error;
+}
