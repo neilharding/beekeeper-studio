@@ -148,6 +148,7 @@ export type PluginRegistryEntry = Pick<
   "id" | "name" | "author" | "description"
 > & {
   repo: string;
+  community: boolean;
 };
 
 export interface Release {
