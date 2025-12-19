@@ -33,6 +33,7 @@ import bksConfig from '@/common/bksConfig'
 import * as sms from 'source-map-support'
 import bindLicenseConstraints from '@commercial/backend/plugin-system/licenseConstraints';
 import { LicenseKey } from '@/common/appdb/models/LicenseKey';
+import { CorePluginEntry, CommunityPluginEntry } from '@/common/appdb/models/PluginEntry';
 
 if (platformInfo.env.development || platformInfo.env.test) {
   sms.install()
@@ -45,6 +46,19 @@ const pluginManager = new PluginManager({
     pluginsDirectory: platformInfo.pluginsDirectory,
   }),
   pluginSettings: bksConfig.plugins,
+  initialRegistryFallback: async () => ({
+    core: await CorePluginEntry.getAllAsRegistryEntries(),
+    community: await CommunityPluginEntry.getAllAsRegistryEntries(),
+  }),
+  onRegistryFetched: async (registry) => {
+    try {
+      await CorePluginEntry.upsertFromRegistry(registry.core);
+      await CommunityPluginEntry.upsertFromRegistry(registry.community);
+      log.info("Successfully cached plugin registry to database");
+    } catch (e) {
+      log.error("Failed to cache plugin registry to database", e);
+    }
+  },
 });
 
 interface Reply {
@@ -173,16 +187,14 @@ async function init() {
   ormConnection = new ORMConnection(platformInfo.appDbPath, false);
   await ormConnection.connect();
 
-try {
-    // FIXME this blocks the thread
-    // first: webpluginmanaer should listen to the message from here
-    // second: if it receives the message, initialize
-    // third: if the message is error, notify the user its not working
+async function initPluginManager() {
     bindLicenseConstraints(pluginManager, await LicenseKey.getLicenseStatus());
     await pluginManager.initialize();
-  } catch (e) {
-    log.error("Error initializing plugin manager", e);
   }
+
+  initPluginManager().catch((e) => {
+    log.error("Error initializing plugin manager", e);
+  });
 
   process.parentPort.postMessage({ type: 'ready' });
 }
