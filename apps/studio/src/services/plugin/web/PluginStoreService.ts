@@ -15,6 +15,7 @@ import { SidebarTab } from "@/store/modules/SidebarModule";
 import {
   Manifest,
   PluginMenuItem,
+  PluginSnapshot,
   PluginView,
   TabType,
   CreatePluginTabOptions,
@@ -350,6 +351,14 @@ export default class PluginStoreService {
 
   removeMenuBarItem(id: string) {
     this.store.commit("menuBar/remove", id);
+  }
+
+setInstalledPlugins(plugins: PluginSnapshot[]) {
+    this.store.commit("setInstalledPlugins", plugins);
+  }
+
+  getInstalledPlugins() {
+    return this.store.state.installedPlugins;
   }
 
   buildPluginTabInit(

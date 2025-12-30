@@ -1,24 +1,12 @@
 <template>
-  <div class="isolated-plugin-view" ref="container">
-    <div v-if="error" class="alert alert-danger">
-      <i class="material-icons-outlined">error</i>
-      <div class="alert-body">{{ error }}</div>
-      <button class="btn btn-flat" @click="reloadComponent">Reload</button>
-    </div>
-    <div v-if="$bksConfig.plugins?.[pluginId]?.disabled" class="alert">
-      <i class="material-icons-outlined">info</i>
-      <div>This plugin ({{ pluginId }}) has been disabled via configuration</div>
-    </div>
-  </div>
+<div class="isolated-plugin-view" ref="container" />
 </template>
 
 <script lang="ts">
 import Vue, { PropType } from "vue";
 import { LoadViewParams } from "@beekeeperstudio/plugin";
 import { ThemeChangedNotification } from "@beekeeperstudio/plugin";
-import rawLog from "@bksLogger";
-
-const log = rawLog.scope("IsolatedPluginView");
+import { PluginSnapshot } from "@/services/plugin";
 
 export default Vue.extend({
   name: "IsolatedPluginView",
@@ -27,8 +15,8 @@ export default Vue.extend({
       type: Boolean,
       default: true,
     },
-    pluginId: {
-      type: String,
+    plugin: {
+      type: Object as PropType<PluginSnapshot>,
       required: true,
     },
     viewId: {
@@ -123,20 +111,20 @@ export default Vue.extend({
       // HACK(azmi): Trigger an initial `themeChanged` notification because
       // older versions of AI Shell don't automatically handle theme state on load.
       iframe.onload = () => {
-        this.$plugin.notify(this.pluginId, {
+        this.$plugin.notify(this.plugin.manifest.id, {
           name: "themeChanged",
           args: this.$plugin.loaders
-            .get(this.pluginId)
+            .get(this.plugin.manifest.id)
             .context.store.getTheme(),
         } as ThemeChangedNotification);
       };
 
       this.$plugin.registerIframe(
-        this.pluginId,
+        this.plugin.manifest.id,
         iframe,
         { command: this.command, params: this.params }
       );
-      this.unsubscribe = this.$plugin.onViewRequest(this.pluginId, (args) => {
+      this.unsubscribe = this.$plugin.onViewRequest(this.plugin.manifest.id, (args) => {
         if (args.source === iframe) {
           this.onRequest?.(args);
         }
@@ -150,43 +138,27 @@ export default Vue.extend({
         return;
       }
 
-      this.$plugin.unregisterIframe(this.pluginId, this.iframe);
+      this.$plugin.unregisterIframe(this.plugin.manifest.id, this.iframe);
       this.unsubscribe?.();
       this.iframe.remove();
       this.iframe = null;
     },
-    initialize() {
-      this.unsubscribeOnReady = this.$plugin.onReady(this.pluginId, () => {
-        this.loaded = true;
-      });
-      this.unsubscribeOnDispose = this.$plugin.onDispose(this.pluginId, () => {
-        this.loaded = false;
-      })
+handleError(e) {
+      console.error(`${this.plugin.manifest.id} iframe error`, e);
     },
     cleanup() {
       this.unsubscribeOnReady?.();
       this.unsubscribeOnDispose?.();
       this.loaded = false;
     },
-    async reloadComponent() {
-      try {
-        this.cleanup();
-        this.unmountIframe();
-        this.initialize();
-        await this.mountIframe();
-      } catch (e) {
-        log.error(e);
-        this.error = e.message;
-      }
-    },
   },
   mounted() {
-    try {
-      this.initialize();
-    } catch (e) {
-      log.error(e);
-      this.error = e.message;
-    }
+    this.unsubscribeOnReady = this.$plugin.onReady(this.plugin.manifest.id, () => {
+      this.loaded = true;
+    });
+    this.unsubscribeOnDispose = this.$plugin.onDispose(this.plugin.manifest.id, () => {
+      this.loaded = false;
+    })
   },
   beforeDestroy() {
     this.cleanup();
