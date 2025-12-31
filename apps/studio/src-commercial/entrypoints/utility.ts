@@ -193,8 +193,8 @@ async function init() {
   await ormConnection.connect();
 
 async function initPluginManager() {
-    await bindIniConfig(pluginManager, bksConfig);
-    await bindLicenseConstraints(pluginManager);
+    bindIniConfig(pluginManager, bksConfig);
+    bindLicenseConstraints(pluginManager);
     await pluginManager.initialize();
   }
 
