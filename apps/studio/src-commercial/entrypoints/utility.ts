@@ -61,10 +61,11 @@ const pluginManager = new PluginManager({
       }
     },
   }),
-  initialRegistryFallback: async () => {
-    return await PluginEntry.getAllAsRegistryEntries();
-  },
+  initialRegistryFallback: async () => await PluginEntry.getAllAsRegistryEntries(),
 });
+
+bindIniConfig(pluginManager, bksConfig);
+bindLicenseConstraints(pluginManager);
 
 interface Reply {
   id: string,
