@@ -189,7 +189,7 @@ export type PluginSettings = {
 }
 
 export type WebPluginLoaderContext = {
-  manifest: Manifest;
+  manifest: ManifestV1;
   store: PluginStoreService;
   utility: UtilityConnection;
   log: ReturnType<typeof rawLog.scope>;
