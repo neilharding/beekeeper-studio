@@ -179,6 +179,7 @@ export default Vue.extend({
       }
     }
   },
+
   methods: {
     notifyFreeTrial() {
       Noty.closeAll('trial')
