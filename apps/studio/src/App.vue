@@ -178,8 +178,8 @@ export default Vue.extend({
         throw error
       }
     }
-  },
 
+  },
   methods: {
     notifyFreeTrial() {
       Noty.closeAll('trial')

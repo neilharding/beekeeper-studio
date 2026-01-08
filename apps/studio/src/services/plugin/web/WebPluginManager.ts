@@ -119,7 +119,7 @@ export default class WebPluginManager {
 
   /** Install a plugin by its id */
   async install(id: string) {
-    const manifest: Manifest = await this.utilityConnection.send("plugin/install", {
+    const manifest = await this.utilityConnection.send("plugin/install", {
       id,
     });
     await this.updatePluginSnapshots();
@@ -129,7 +129,7 @@ export default class WebPluginManager {
 
   /** Update a plugin by its id */
   async update(id: string) {
-    const manifest: Manifest = await this.utilityConnection.send("plugin/update", {
+    const manifest = await this.utilityConnection.send("plugin/update", {
       id,
     });
     await this.reloadPlugin(id);
