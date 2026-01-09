@@ -122,8 +122,8 @@ export default class WebPluginManager {
     const manifest = await this.utilityConnection.send("plugin/install", {
       id,
     });
-    await this.updatePluginSnapshots();
     await this.loadPlugin(manifest);
+    await this.updatePluginSnapshots();
     return manifest;
   }
 
@@ -139,8 +139,8 @@ export default class WebPluginManager {
   /** Uninstall a plugin by its id */
   async uninstall(id: string) {
     await this.utilityConnection.send("plugin/uninstall", { id });
-    await this.unloadPlugin(id);
     await this.updatePluginSnapshots();
+    await this.unloadPlugin(id);
   }
 
   private async reloadPlugin(id: string, manifest?: Manifest) {
@@ -292,11 +292,6 @@ execute(pluginId: string, command: string) {
       return this.loaders.get(manifest.id);
     }
 
-    const snapshot = this.pluginStore.getPluginSnapshots().find((p) => p.manifest.id === manifest.id);
-    if (!snapshot) {
-      throw new Error(`Plugin "${manifest.id}" snapshot not found.`);
-    }
-
     const loader = new WebPluginLoader({
       manifest,
       store: this.pluginStore,
@@ -304,7 +299,7 @@ execute(pluginId: string, command: string) {
       log: rawLog.scope(`Plugin:${manifest.id}`),
       appVersion: this.appVersion,
       fileHelpers: this.fileHelpers,
-      noty: this.noty,
+noty: this.noty,
       confirm: this.confirm,
       disabled: snapshot.disabled,
     });
