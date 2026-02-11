@@ -6,6 +6,12 @@ import { FileHelpers, JsonValue } from "@/types";
 import type Noty from "noty";
 
 /**
+ * Reserved plugin IDs that cannot be used by third-party plugins.
+ * These are reserved for internal config sections like [plugins.general].
+ */
+export const RESERVED_PLUGIN_IDS = ['general'] as const;
+
+/**
  * The kind of the tab. There is only one kind currently:
  *
  * - `base-tab`: A plain tab with no special UI.

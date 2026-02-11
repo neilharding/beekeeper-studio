@@ -6,7 +6,7 @@ import {
   DownloaderConfig,
   DownloaderReport,
 } from "nodejs-file-downloader";
-import { Manifest, PluginView, Release } from "./types";
+import { Manifest, PluginView, Release, RESERVED_PLUGIN_IDS } from "./types";
 import extract from "extract-zip";
 import { tmpdir } from "os";
 
@@ -96,6 +96,10 @@ export default class PluginFileManager {
       tmp?: boolean;
     } = {}
   ) {
+    if (RESERVED_PLUGIN_IDS.includes(pluginId as typeof RESERVED_PLUGIN_IDS[number])) {
+      throw new Error(`Plugin ID "${pluginId}" is reserved and cannot be installed.`);
+    }
+
     const directory = this.getDirectoryOf(pluginId);
     const mustCleanup = !this.options?.downloadDirectory;
     const tmpDirectory =
@@ -257,7 +261,12 @@ export default class PluginFileManager {
       });
 
       try {
-        manifests.push(JSON.parse(manifestContent));
+        const manifest = JSON.parse(manifestContent);
+        if (RESERVED_PLUGIN_IDS.includes(manifest.id)) {
+          log.warn(`Plugin "${dir}" uses reserved ID "${manifest.id}". Skipping.`);
+          continue;
+        }
+        manifests.push(manifest);
       } catch (e) {
         log.error(`Failed to parse manifest for plugin "${dir}":`, e);
       }

@@ -358,6 +358,9 @@ declare interface IBksConfig {
         "bks-ai-shell": {
             disabled: boolean;
         };
+        general: {
+            thirdPartyDisabled: boolean;
+        };
     };
     security: {
         disconnectOnIdle: boolean;
