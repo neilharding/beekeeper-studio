@@ -46,9 +46,6 @@ const pluginManager = new PluginManager({
   }),
 });
 
-bindIniConfig(pluginManager, bksConfig);
-bindLicenseConstraints(pluginManager);
-
 interface Reply {
   id: string,
   type: 'reply' | 'error',
@@ -175,13 +172,9 @@ async function init() {
   ormConnection = new ORMConnection(platformInfo.appDbPath, false);
   await ormConnection.connect();
 
-async function initPluginManager() {
-    bindIniConfig(pluginManager, bksConfig);
-    bindLicenseConstraints(pluginManager);
-    await pluginManager.initialize();
-  }
-
-  initPluginManager().catch((e) => {
+  bindIniConfig(pluginManager, bksConfig);
+  bindLicenseConstraints(pluginManager);
+  pluginManager.initialize().catch((e) => {
     log.error("Error initializing plugin manager", e);
   });
 

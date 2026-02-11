@@ -7,8 +7,7 @@ import {
 } from "@/services/plugin/errors";
 import { Manifest } from "@/services/plugin";
 import { LicenseKey } from "@/common/appdb/models/LicenseKey";
-import bindLicenseConstraints from "@commercial/backend/plugin-system/hooks/licenseConstraints";
-import bindIniConfig from "@commercial/backend/plugin-system/hooks/iniConfig";
+import { bindLicenseConstraints, bindIniConfig } from "@commercial/backend/plugin-system/hooks";
 import { createLicense } from "@tests/utils";
 import preparePluginSystemTestGroup from "./utils/preparePluginSystem";
 import PluginRegistry from "@/services/plugin/PluginRegistry";

@@ -2,7 +2,7 @@
  * iniConfig Hook
  *
  * Binds a plugin snapshot transformer that disables plugins based on the
- * user's configuration file (beekeeper.ini).
+ * user's configuration file (config.ini).
  *
  * Example config:
  * [plugins.my-plugin-id]
@@ -15,7 +15,7 @@ import _ from "lodash";
 const log = rawLog.scope("plugin-system-hook:iniConfig");
 const boundSymbol = Symbol("iniConfig");
 
-export default function bindIniConfig(manager: PluginManager, config: IBksConfig) {
+export function bindIniConfig(manager: PluginManager, config: IBksConfig) {
   if (manager[boundSymbol]) {
     log.warn("already bound!");
     return;

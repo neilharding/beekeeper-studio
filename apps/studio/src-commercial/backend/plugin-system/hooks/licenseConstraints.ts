@@ -21,7 +21,7 @@ import globals from '@/common/globals'
 const log = rawLog.scope("plugin-system-hook:licenseConstraints");
 const boundSymbol = Symbol("licenseConstraints");
 
-export default function bindLicenseConstraints(manager: PluginManager) {
+export function bindLicenseConstraints(manager: PluginManager) {
   if (manager[boundSymbol]) {
     log.warn("already bound!");
     return;
