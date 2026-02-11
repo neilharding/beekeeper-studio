@@ -1,17 +1,15 @@
 import { _electron as electron } from 'playwright';
 import { test, expect, beforeEach, afterEach } from '@playwright/test';
 import { QueryTab } from '../pageComponents/QueryTab';
-import { EntityRelationshipDiagram } from '../pageComponents/EntityRelationshipDiagram';
 import { userActions } from "../pageActions/index";
 import { POSTGRES_CONFIG } from './config/postgresDbConfig';
 
 let electronApp;
 let window;
 let queryTab;
-let erd;
 let userAttemptsTo;
 
-test.describe.only("ERD (Entity Relationship Diagram) Feature", () => {
+test.describe("ERD (Entity Relationship Diagram) Feature", () => {
   beforeEach(async () => {
     electronApp = await electron.launch({
       args: ['dist/main.js'],
@@ -23,7 +21,6 @@ test.describe.only("ERD (Entity Relationship Diagram) Feature", () => {
     });
     window = await electronApp.firstWindow();
     queryTab = new QueryTab(window);
-    erd = new EntityRelationshipDiagram(window);
     userAttemptsTo = userActions(window);
     
     // Connect to PostgreSQL test database
@@ -34,8 +31,6 @@ test.describe.only("ERD (Entity Relationship Diagram) Feature", () => {
     // Wait for connection to be established
     await expect(queryTab.queryTabTextArea).toBeVisible();
 
-    // Wait for ERD plugin to fully load and register menu items
-    await userAttemptsTo.waitForErdPluginToLoad();
   });
 
   afterEach(async () => {
@@ -46,30 +41,30 @@ test.describe.only("ERD (Entity Relationship Diagram) Feature", () => {
     // Right-click on 'actor' table in sidebar and select ERD option
     await userAttemptsTo.openErdFromTableContextMenu('actor');
 
-    // Verify ERD tab header appears (text like "actor - ERD")
-    const tabHeader = await erd.erdTabHeader();
-    await expect(tabHeader).toBeVisible({ timeout: 10000 });
+    // Verify ERD tab header appears
+    await userAttemptsTo.verifyErdTabVisible();
 
-    // Verify ERD iframe is loaded inside the tab
-    await expect(erd.erdIframe).toBeVisible({ timeout: 10000 });
+    // Verify ERD iframe is loaded
+    await userAttemptsTo.verifyErdIframeLoaded();
+
+    // Verify actor table is displayed in the ERD
+    await userAttemptsTo.verifyActorTableInErd();
   });
 
-  test("ERD tab shows schema content", async () => {
+  test("ERD shows table structure and relationships", async () => {
     // Open ERD from table context menu
     await userAttemptsTo.openErdFromTableContextMenu('actor');
 
     // Verify ERD tab is visible
-    await expect(erd.erdTab).toBeVisible({ timeout: 10000 });
+    await userAttemptsTo.verifyErdTabVisible();
 
-    // Verify iframe is loaded
-    await expect(erd.erdIframe).toBeVisible({ timeout: 10000 });
+    // Verify ERD iframe is loaded
+    await userAttemptsTo.verifyErdIframeLoaded();
 
-    // Get the iframe content and verify schema elements exist
-    const iframe = erd.erdIframe;
-    const frameContent = await iframe.contentFrame();
+    // Verify actor table is displayed
+    await userAttemptsTo.verifyActorTableInErd();
 
-    // Verify the schema folder/structure is visible in the ERD
-    // Based on recording: "folderpublic" text appears in the ERD
-    await expect(frameContent.getByText(/folder|public|schema/i)).toBeVisible({ timeout: 10000 });
+    // Verify schema is visible
+    await userAttemptsTo.verifySchemaInErd();
   });
 });
