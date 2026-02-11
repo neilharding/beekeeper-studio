@@ -6,6 +6,9 @@
 import Vue, { PropType } from "vue";
 import { LoadViewParams } from "@beekeeperstudio/plugin";
 import { ThemeChangedNotification } from "@beekeeperstudio/plugin";
+import rawLog from "@bksLogger";
+
+const log = rawLog.scope("IsolatedPluginView");
 
 export default Vue.extend({
   name: "IsolatedPluginView",
@@ -142,8 +145,8 @@ export default Vue.extend({
       this.iframe.remove();
       this.iframe = null;
     },
-handleError(e) {
-      console.error(`${this.pluginId} iframe error`, e);
+    handleError(e) {
+      log.error(`${this.pluginId} iframe error`, e);
     },
     cleanup() {
       this.unsubscribeOnReady?.();
