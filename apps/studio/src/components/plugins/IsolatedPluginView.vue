@@ -145,8 +145,13 @@ export default Vue.extend({
       this.iframe.remove();
       this.iframe = null;
     },
-    handleError(e) {
-      log.error(`${this.pluginId} iframe error`, e);
+    initialize() {
+      this.unsubscribeOnReady = this.$plugin.onReady(this.pluginId, () => {
+        this.loaded = true;
+      });
+      this.unsubscribeOnDispose = this.$plugin.onDispose(this.pluginId, () => {
+        this.loaded = false;
+      })
     },
     cleanup() {
       this.unsubscribeOnReady?.();
@@ -155,12 +160,12 @@ export default Vue.extend({
     },
   },
   mounted() {
-    this.unsubscribeOnReady = this.$plugin.onReady(this.pluginId, () => {
-      this.loaded = true;
-    });
-    this.unsubscribeOnDispose = this.$plugin.onDispose(this.pluginId, () => {
-      this.loaded = false;
-    })
+    try {
+      this.initialize();
+    } catch (e) {
+      log.error(e);
+      this.error = e.message;
+    }
   },
   beforeDestroy() {
     this.cleanup();

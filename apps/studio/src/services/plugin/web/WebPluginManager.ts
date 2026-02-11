@@ -1,6 +1,6 @@
 import type { UtilityConnection } from "@/lib/utility/UtilityConnection";
 import rawLog from "@bksLogger";
-import { ManifestV1 as Manifest, OnViewRequestListener, PluginRegistryEntry } from "../types";
+import { ManifestV1 as Manifest, OnViewRequestListener } from "../types";
 import PluginStoreService from "./PluginStoreService";
 import WebPluginLoader from "./WebPluginLoader";
 import { ContextOption } from "@/plugins/BeekeeperPlugin";
@@ -49,7 +49,7 @@ export type WebPluginManagerParams = {
  * and `onViewRequest`. (Don't forget to register the iframe first! Use
  * `registerIframe` and `unregisterIframe`)
  *
- * For more info about a plugin, use `pluginOf`.
+ * @see {PluginStoreService.getSnapshots} - to find info about plugins
  */
 export default class WebPluginManager {
   /** A map of plugin id -> loader */
@@ -180,15 +180,6 @@ export default class WebPluginManager {
     })
   }
 
-  /** Get the snapshot of a plugin */
-  pluginOf(pluginId: string) {
-    const plugin = this.pluginStore.getSnapshots().find((p) => p.manifest.id === pluginId);
-    if (!plugin) {
-      throw new Error("Plugin not found: " + pluginId);
-    }
-    return plugin;
-  }
-
   buildUrlFor(pluginId: string, entry: string) {
     const loader = this.loaders.get(pluginId);
     if (!loader) {
@@ -266,7 +257,7 @@ export default class WebPluginManager {
     return loader.onDispose(fn);
   }
 
-execute(pluginId: string, command: string) {
+  execute(pluginId: string, command: string) {
     const loader = this.loaders.get(pluginId);
     if (!loader) {
       throw new Error(
@@ -291,7 +282,7 @@ execute(pluginId: string, command: string) {
       log: rawLog.scope(`Plugin:${manifest.id}`),
       appVersion: this.appVersion,
       fileHelpers: this.fileHelpers,
-noty: this.noty,
+      noty: this.noty,
       confirm: this.confirm,
       disabled: snapshot.disabled,
     });

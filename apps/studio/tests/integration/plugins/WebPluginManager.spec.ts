@@ -15,7 +15,7 @@ import PluginRegistry from "@/services/plugin/PluginRegistry";
 import { MockPluginRepositoryService } from "./utils/registry";
 import PluginStoreService from "@/services/plugin/web/PluginStoreService";
 import { UtilityConnection } from "@/lib/utility/UtilityConnection";
-import bindIniConfig from "@commercial/backend/plugin-system/hooks/iniConfig";
+import { bindIniConfig } from "@commercial/backend/plugin-system/hooks";
 
 describe("WebPluginManager", () => {
   const { server, fileManager, emptyRegistry } = preparePluginSystemTestGroup();
@@ -106,7 +106,9 @@ describe("WebPluginManager", () => {
 
     it("should be flagged as disabled", async () => {
       await webManager.initialize();
-      expect(webManager.pluginOf("test-plugin").disabled).toBe(true);
+      const snapshot = webManager.pluginStore.getSnapshots()
+        .find((snapshot) => snapshot.manifest.id === "test-plugin");
+      expect(snapshot.disabled).toBe(true);
     });
   });
 

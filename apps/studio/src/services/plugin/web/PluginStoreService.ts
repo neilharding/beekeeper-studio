@@ -353,7 +353,7 @@ export default class PluginStoreService {
     this.store.commit("menuBar/remove", id);
   }
 
-async loadSnapshots() {
+  async loadSnapshots() {
     await this.store.dispatch("plugins/snapshots/load");
   }
 

@@ -1,6 +1,6 @@
 import {
   AfterViewRequestCallback,
-  Manifest,
+  ManifestV1 as Manifest,
   OnViewRequestListener,
   ViewResultModifier,
   WebPluginContext,
