@@ -28,6 +28,8 @@ import { PluginHandlers } from '@/handlers/pluginHandlers';
 import { PluginManager } from '@/services/plugin';
 import PluginFileManager from '@/services/plugin/PluginFileManager';
 import _ from 'lodash';
+import { ConfigurationModule } from '@commercial/backend/plugin-system/modules/ConfigurationModule';
+import bksConfig from '@/common/bksConfig';
 
 import * as sms from 'source-map-support'
 
@@ -42,6 +44,7 @@ const pluginManager = new PluginManager({
     pluginsDirectory: platformInfo.pluginsDirectory,
   }),
 });
+pluginManager.registerModule(ConfigurationModule.with({ config: bksConfig }));
 
 interface Reply {
   id: string,

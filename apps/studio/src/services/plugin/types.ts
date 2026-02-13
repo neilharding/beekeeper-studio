@@ -228,20 +228,15 @@ export type CreatePluginTabOptions = {
  * By default, `disabled` is `false`.
  * This value may be modified by other modules (e.g. {@link ConfigurationModule}).
  */
-type DisableState = (
+type DisableState =
   | { disabled: false }
-  | { disabled: true; reason: DisableReason }
-);
-
-/**
- * IMPORTANT:
- * If a new reason is added, update the corresponding UI messages
- * in `DisableReason.vue`.
- */
-export type DisableReason = {
-  source: "config";
-  cause: "disabled-by-user" | "disabled-by-admin";
-};
+  | {
+      disabled: true;
+      reason:
+        | "plugin-system-disabled"
+        | "community-plugins-disabled"
+        | "disabled-by-config";
+    };
 
 /**
  * Indicates where a plugin originates from:
