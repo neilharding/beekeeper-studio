@@ -6,12 +6,6 @@ import { FileHelpers, JsonValue } from "@/types";
 import type Noty from "noty";
 
 /**
- * Reserved plugin IDs that cannot be used by third-party plugins.
- * These are reserved for internal config sections like [plugins.general].
- */
-export const RESERVED_PLUGIN_IDS = ['general'] as const;
-
-/**
  * The kind of the tab. There is only one kind currently:
  *
  * - `base-tab`: A plain tab with no special UI.
@@ -208,10 +202,13 @@ export type WebPluginContext = {
   confirm(title?: string, message?: string, options?: { confirmLabel?: string, cancelLabel?: string }): Promise<boolean>;
 }
 
-export type PluginContext = {
-  manifest: Manifest;
+export type PluginSnapshot = {
+  manifest: ManifestV1;
+  /** Is this compatible with the current app version? */
   loadable: boolean;
-}
+  origin: PluginOrigin;
+  disableState: DisableState;
+};
 
 export type WebPluginManagerStatus = "initializing" | "ready" | "failed-to-initialize";
 
@@ -225,6 +222,25 @@ export type CreatePluginTabOptions = {
   viewId: string;
   params?: JsonValue;
   command: string;
+};
+
+/**
+ * By default, `disabled` is `false`.
+ * This value may be modified by other modules (e.g. {@link ConfigurationModule}).
+ */
+type DisableState = (
+  | { disabled: false }
+  | { disabled: true; reason: DisableReason }
+);
+
+/**
+ * IMPORTANT:
+ * If a new reason is added, update the corresponding UI messages
+ * in `DisableReason.vue`.
+ */
+export type DisableReason = {
+  source: "config";
+  cause: "disabled-by-user" | "disabled-by-admin";
 };
 
 /**

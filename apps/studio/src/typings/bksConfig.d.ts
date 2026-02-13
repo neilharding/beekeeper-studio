@@ -354,15 +354,21 @@ declare interface IBksConfig {
             previousPage: string;
         };
     };
+    pluginSystem: {
+        community: {
+            disabled: boolean;
+        };
+        disabled: boolean;
+        official: {
+            disabled: boolean;
+        };
+    };
     plugins: {
         "bks-ai-shell": {
             disabled: boolean;
         };
         "bks-er-diagram": {
             disabled: boolean;
-        };
-        general: {
-            thirdPartyDisabled: boolean;
         };
     };
     security: {
