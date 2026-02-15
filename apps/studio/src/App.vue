@@ -13,7 +13,6 @@
           v-else
         />
         <auto-updater />
-        <state-manager />
         <notification-manager />
         <upgrade-required-modal />
       </template>
@@ -56,7 +55,6 @@ import Titlebar from './components/Titlebar.vue'
 import CoreInterface from './components/CoreInterface.vue'
 import ConnectionInterface from './components/ConnectionInterface.vue'
 import AutoUpdater from './components/AutoUpdater.vue'
-import StateManager from './components/quicksearch/StateManager.vue'
 import DataManager from './components/data/DataManager.vue'
 import querystring from 'query-string'
 import ConfigurationWarningModal from '@/components/ConfigurationWarningModal.vue'
@@ -96,7 +94,7 @@ export default Vue.extend({
   mixins: [assignContextMenuToAllInputs],
   components: {
     CoreInterface, ConnectionInterface, Titlebar, AutoUpdater, NotificationManager,
-    StateManager, DataManager, UpgradeRequiredModal, ConfirmationModalManager, Dropzone,
+    DataManager, UpgradeRequiredModal, ConfirmationModalManager, Dropzone,
     UtilDiedModal, WorkspaceSignInModal, ImportQueriesModal, ImportConnectionsModal,
     EnterLicenseModal, TrialExpiredModal, LicenseExpiredModal,
     LifetimeLicenseExpiredModal, WorkspaceCreateModal, WorkspaceRenameModal, WorkspaceDeleteModal,
