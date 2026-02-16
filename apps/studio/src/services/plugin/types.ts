@@ -192,7 +192,7 @@ export type WebPluginContext = {
   log: ReturnType<typeof rawLog.scope>;
   appVersion: string;
   fileHelpers: FileHelpers;
-noty: {
+ noty: {
     success(text: string, options?: any): Noty;
     error(text: string, options?: any): Noty;
     warning(text: string, options?: any): Noty;

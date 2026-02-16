@@ -11,9 +11,6 @@ export default class PluginRepositoryService {
 
   constructor(options?: { octokitOptions?: OctokitOptions }) {
     this.octokit = new Octokit({
-      baseUrl: process.env.GITHUB_API_BASE_URL,
-      userAgent: "Beekeeper Studio",
-      auth: process.env.GITHUB_TOKEN,
       baseUrl: process.env.BKS_PLUGIN_GITHUB_API_BASE_URL,
       userAgent: "Beekeeper Studio",
       auth: process.env.BKS_PLUGIN_GITHUB_TOKEN,

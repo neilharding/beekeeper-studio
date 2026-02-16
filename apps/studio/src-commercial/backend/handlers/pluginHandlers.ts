@@ -43,7 +43,7 @@ export const PluginHandlers: (pluginManager: PluginManager) => IPluginHandlers =
     });
   },
   "plugin/plugins": async () => {
-    return await pluginManager.getPluginSnapshots();
+    return await pluginManager.getPlugins();
   },
   "plugin/entries": async ({ clearCache }) => {
     if (clearCache) {
