@@ -202,39 +202,34 @@ noty: {
   disabled: boolean;
 }
 
-export type PluginSnapshot = DisableState & {
-  /** From the plugin's manifest.json */
+export type PluginSnapshot = {
   manifest: ManifestV1;
   /** Is this compatible with the current app version? */
-  compatible: boolean;
+  loadable: boolean;
   origin: PluginOrigin;
+  disableState: DisableState;
 };
 
-type InstallState = {
-  installed: false;
-} | {
-  installed: true;
-  installedVersion: string;
-};
-
-/* Disable state is controlled by hooks, e.g., bindLicenseConstraints and bindIniConfig. */
-type DisableState = ({
-  disabled: false;
-} | {
-  disabled: true;
-  disableReasons: DisableReason[];
-});
-
-/** IMPORTANT: If you add a new type here, be sure to update the messages in DisableReason.vue */
-export type DisableReason =
+/**
+ * By default, `disabled` is `false`.
+ * This value may be modified by other modules (e.g. {@link ConfigurationModule}).
+ */
+export type DisableState =
+  | { disabled: false }
   | {
-    source: "license";
-    cause: "max-plugins-reached" | "max-community-plugins-reached" | "valid-license-required";
-    /** The limit of plugins that can be used. Defined if the cause is
-     * `"max-plugins-reached"` or `"max-community-plugins-reached"`. */
-    limit?: number;
-  }
-  | { source: "config" };
+      disabled: true;
+      reason: "disabled-by-config";
+    }
+  | {
+      disabled: true;
+      reason: "disabled-by-license";
+      detail:
+        | { cause: "valid-license-required" }
+        | {
+            cause: "max-plugins-reached" | "max-community-plugins-reached";
+            limit: number;
+          };
+    };
 
 export type WebPluginManagerStatus = "initializing" | "ready" | "failed-to-initialize";
 
