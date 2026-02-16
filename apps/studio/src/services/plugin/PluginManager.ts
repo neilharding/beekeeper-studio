@@ -64,8 +64,8 @@ type PluginSnapshotTransformer = (
  * see the WebPluginManager class.
  */
 export default class PluginManager {
-  private initialized: boolean;
-  private registry: PluginRegistry;
+  private initialized = false;
+  public readonly registry: PluginRegistry;
   private fileManager: PluginFileManager;
   /** A list of plugin manifests that are installed */
   private manifests: ManifestV1[];
@@ -141,14 +141,6 @@ export default class PluginManager {
         });
       }
     }
-  }
-
-  async getEntries(refresh?: boolean) {
-    this.initializeGuard();
-    if (refresh) {
-      await this.registry.fetch();
-    }
-    return this.registry.entries;
   }
 
   /**

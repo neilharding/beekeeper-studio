@@ -143,19 +143,16 @@ export type ManifestV1 = Omit<ManifestV0, "manifestVersion" | "capabilities"> & 
   }
 };
 
-export type RawPluginRegistryEntry = {
-  id: string;
-  name: string;
-  description: string;
-  author: string;
+/**
+ * The structure of a plugin entry.
+ *
+ * @see {@link https://github.com/beekeeper-studio/beekeeper-studio-plugins}
+ */
+export type PluginRegistryEntry = Pick<
+  Manifest,
+  "id" | "name" | "author" | "description"
+> & {
   repo: string;
-};
-
-export type PluginRegistryEntry = RawPluginRegistryEntry & {
-  /** Data not defined in plugins.json, but derived or enriched at runtime */
-  metadata: {
-    origin: PluginOrigin;
-  },
 };
 
 export interface Release {
@@ -239,14 +236,6 @@ export type DisableReason =
   }
   | { source: "config" };
 
-/**
- * Plugins can be obtained from three sources:
- * - `core` => https://github.com/beekeeper-studio/beekeeper-studio-plugins/blob/main/plugins.json
- * - `community` => https://github.com/beekeeper-studio/beekeeper-studio-plugins/blob/main/community-plugins.json
- * - `unpublished` => None of the above
- */
-export type PluginOrigin = "core" | "community" | "unpublished";
-
 export type WebPluginManagerStatus = "initializing" | "ready" | "failed-to-initialize";
 
 export type WebPluginViewInstance = {
@@ -263,58 +252,9 @@ export type CreatePluginTabOptions = {
 };
 
 /**
- * Complete UI-facing representation of a plugin.
- * Combines plugin metadata with mutable UI/runtime state.
+ * Indicates where a plugin originates from:
+ * - `official`: {@link https://github.com/beekeeper-studio/beekeeper-studio-plugins/blob/main/plugins.json}
+ * - `community`: {@link https://github.com/beekeeper-studio/beekeeper-studio-plugins/blob/main/community-plugins.json}
+ * - `unlisted`: Not listed in either repository
  */
-export type UIPlugin = UIPluginMeta & UIPluginState;
-
-/**
- * Metadata describing a plugin for plugin manager modal.
- * Mostly sourced from `plugins.json`, with some fields populated at install time.
- */
-export type UIPluginMeta = {
-  // Infos that are available in plugins.json
-  readonly id: Manifest['id'];
-  readonly name: Manifest['name'];
-  readonly author: Manifest['author'];
-  readonly description: Manifest['description'];
-  readonly origin: PluginOrigin;
-  /** Set during install/update; not present in `plugins.json`. **/
-  minAppVersion?: Manifest['minAppVersion'];
-  /**
-   * Repository URL of the plugin.
-   * Undefined for local or unpublished plugins.
-   */
-  repo?: string;
-  /**
-   * To find out if it's `compatible`, try installing it and see if it fails
-   * or not. After that, this property will be set.
-   **/
-  compatible?: boolean;
-} & InstallState & DisableState;
-
-/**
- * Mutable UI state for a plugin.
- * Owned and updated by the UI (e.g. PluginManagerModal).
- */
-export type UIPluginState = {
-  /** If it's being installed or updated, this is `true`. */
-  installing: boolean;
-  updateAvailable: boolean;
-  /**
-   * `true` if it's being checked.
-   * `false` if it's **not** being checked.
-   * `null` if it's **not** being checked and **not** been checked before.
-   **/
-  checkingForUpdates: null | boolean;
-  error?: Error;
-};
-
-export type RawFetchRegistryResult = {
-  core: RawPluginRegistryEntry[];
-  community: RawPluginRegistryEntry[];
-  errors: {
-    core: Error | null;
-    community: Error | null;
-  }
-}
+export type PluginOrigin = "official" | "community" | "unlisted";

@@ -62,13 +62,13 @@ describe("Basic Plugin Management", () => {
 
   describe("Discovery", () => {
     it("can list plugin entries", async () => {
-      const manager = new PluginManager({ appVersion: "5.4.0", fileManager, registry });
-      await manager.initialize();
-      const entries = await manager.getEntries();
-
-      expect(entries).toHaveLength(2);
-      expect(entries[0].id).toBe("test-plugin");
-      expect(entries[1].id).toBe("frozen-banana");
+      const manager = await initPluginManager(AppVer.COMPAT);
+      const { official, community } = await manager.registry.getEntries();
+      expect(official).toHaveLength(2);
+      expect(official[0].id).toBe("test-plugin");
+      expect(official[1].id).toBe("frozen-banana");
+      expect(community).toHaveLength(1);
+      expect(community[0].id).toBe("watermelon-sticker");
     });
 
     it("can get plugin details (versions, readme, etc..)", async () => {

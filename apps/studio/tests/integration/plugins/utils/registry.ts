@@ -1,7 +1,14 @@
-import type { Manifest, RawPluginRegistryEntry, Release } from "@/services/plugin/types";
+import { Manifest, PluginOrigin, PluginRegistryEntry, Release } from "@/services/plugin";
 import PluginRepositoryService from "@/services/plugin/PluginRepositoryService";
 import { MockPluginServer } from "./server";
-import _ from "lodash";
+
+export type Plugin = {
+  id: string;
+  name: string;
+  latestRelease: Pick<Manifest, "version" | "minAppVersion">;
+  readme: string;
+  origin: PluginOrigin;
+};
 
 /**
  * A mock plugin repo.
@@ -34,8 +41,47 @@ export class MockPluginRepositoryService extends PluginRepositoryService {
     super();
   }
 
-  setPluginsJson(type: "core" | "community", plugins: (Partial<RawPluginRegistryEntry> & { id: string; })[]) {
-    const finalPlugins = plugins.map((plugin) => ({
+  protected async fetchJson(_owner: string, _repo: string, path: string): Promise<PluginRegistryEntry[]> {
+    const plugins = this.plugins.filter((p) =>
+      path === "plugins.json"
+        ? p.origin === "official"
+        : p.origin === "community"
+    );
+    return plugins.map((p) => ({
+      id: p.id,
+      name: p.name,
+      repo: this.repoStr(p),
+      author: this.authorStr(p),
+      description: this.descriptionStr(p),
+    }));
+  }
+
+  async fetchLatestRelease(owner: string, repo: string): Promise<Release> {
+    const plugin = this.plugins.find(
+      (p) => this.repoStr(p) === this.repoStr(owner, repo)
+    );
+    if (!plugin) {
+      throw new Error(
+        `Plugin "${owner}/${repo}" not found in registry. Have you registered the plugin?`
+      );
+    }
+    return this.createLatestRelease(plugin);
+  }
+
+  protected async fetchReadme(owner: string, repo: string): Promise<string> {
+    const plugin = this.plugins.find(
+      (p) => this.repoStr(p) === this.repoStr(owner, repo)
+    );
+    if (!plugin) {
+      throw new Error(
+        `Plugin "${owner}/${repo}" not found in registry. Have you registered the plugin?`
+      );
+    }
+    return plugin.readme;
+  }
+
+  private createLatestRelease(plugin: Plugin) {
+    const manifest = {
       id: plugin.id,
       name: plugin.name ?? _.startCase(plugin.id),
       repo: plugin.repo ?? `${plugin.id}/${plugin.id}`,
