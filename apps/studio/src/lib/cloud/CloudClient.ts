@@ -16,7 +16,15 @@ import { camelCaseObjectKeys, snakeCaseObjectKeys } from '@/common/utils';
 
 import { IPlatformInfo } from '@/common/IPlatformInfo';
 
-const log = rawLog.scope('cloudClient')
+// const log = rawLog.scope('cloudClient')
+const log = {
+  info() {
+
+  },
+  debug() {
+
+  }
+}
 
 const ad = axios.defaults
 

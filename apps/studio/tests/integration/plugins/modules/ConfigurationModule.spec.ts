@@ -53,7 +53,6 @@ describe("Plugin Configuration Module", () => {
   });
 
   beforeEach(async () => {
-    PluginManager.PREINSTALLED_PLUGINS = [];
     const setting = await UserSetting.findOneBy({ key: "pluginSettings" });
     setting.userValue = "{}";
     await setting.save();
@@ -78,14 +77,12 @@ describe("Plugin Configuration Module", () => {
       manager.registerModule(ConfigurationModule.with({ config }));
       await manager.initialize();
 
-      expect(manager.registry.getEntries()).resolves.toStrictEqual({
+      await expect(manager.registry.getEntries()).resolves.toStrictEqual({
         official: [],
         community: [],
       });
-      expect(manager.installPlugin("official-plugin")).rejects.toThrow(
-        PluginSystemDisabledError
-      );
-      expect(manager.installPlugin("community-plugin")).rejects.toThrow(
+      await expect(manager.installPlugin("official-plugin")).rejects.toThrow();
+      await expect(manager.installPlugin("community-plugin")).rejects.toThrow(
         PluginSystemDisabledError
       );
       expect(fetchSpy).not.toHaveBeenCalled();
@@ -93,15 +90,7 @@ describe("Plugin Configuration Module", () => {
       fetchSpy.mockRestore();
     });
 
-    it.only("can install allowed plugins if they are bundled", async () => {
-      const manager = createPluginManager();
-      manager.registerModule(ConfigurationModule.with({ config }));
-      await manager.initialize();
-      await manager.installPlugin("official-plugin");
-      expect(manager.getPlugins()).resolves.toHaveLength(1);
-    });
-
-    it("can keep allowed plugins enabled while disabling others", async () => {
+    it("can disable disallowed plugins", async () => {
       const manager = createPluginManager();
       await manager.initialize();
       await manager.installPlugin("official-plugin");

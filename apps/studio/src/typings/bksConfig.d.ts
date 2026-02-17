@@ -355,6 +355,7 @@ declare interface IBksConfig {
         };
     };
     pluginSystem: {
+        allow: string[];
         communityDisabled: boolean;
         disabled: boolean;
     };

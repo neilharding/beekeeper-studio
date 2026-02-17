@@ -58,8 +58,11 @@ export class ConfigurationModule extends Module {
     };
   }
 
-  private beforeInstallGuard() {
-    if (this.config.pluginSystem.disabled) {
+  private beforeInstallGuard(id: string) {
+    if (
+      this.config.pluginSystem.disabled &&
+      !this.config.pluginSystem.allow.includes(id)
+    ) {
       throw new PluginSystemDisabledError();
     }
   }
@@ -72,6 +75,10 @@ export class ConfigurationModule extends Module {
       }
 
       if (this.config.pluginSystem.disabled) {
+        if (this.config.pluginSystem.allow.includes(snapshot.manifest.id)) {
+          return snapshot;
+        }
+
         return {
           ...snapshot,
           disableState: { disabled: true, reason: "plugin-system-disabled" },

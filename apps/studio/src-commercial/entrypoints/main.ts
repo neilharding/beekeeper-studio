@@ -11,6 +11,10 @@ import log from '@bksLogger'
 require('@electron/remote/main').initialize()
 log.info("initializing background")
 
+// app.commandLine.appendSwitch('force-color-profile', 'srgb');
+// app.commandLine.appendSwitch('disable-color-correct-rendering');
+
+// app.commandLine.appendSwitch('disable-gpu-compositing');
 
 import MenuHandler from '@/background/NativeMenuBuilder'
 import { IGroupedUserSettings, UserSetting } from '@/common/appdb/models/user_setting'
@@ -214,7 +218,6 @@ app.on('ready', async () => {
     console.log("Dev mode detected, disabling CORS")
     app.commandLine.appendSwitch('disable-web-security');
     app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors')
-
   }
 
   // this gets positional arguments

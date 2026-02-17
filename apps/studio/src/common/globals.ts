@@ -30,6 +30,12 @@ export default {
   firebird: {
     poolSize: 5,
   },
+  plugins: {
+    ensureInstalled: [
+      "@beekeeperstudio/bks-ai-shell",
+      "@beekeeperstudio/bks-er-diagram",
+    ],
+  }
 }
 
 

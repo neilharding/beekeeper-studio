@@ -86,21 +86,57 @@ async function extractArchive(
 export default class PluginFileManager {
   constructor(readonly options: PluginFileManagerOptions) {}
 
+  /**
+   * Copy `sourceDir` to app's `pluginsDirectory`. It assumes that the source
+   * directory is a plugin directory with valid file structure.
+   *
+   * If the plugin is already installed, it will be replaced.
+   *
+   * @param pluginId Plugin ID
+   * @param sourceDir Source directory to the plugin
+   **/
+  install(
+    pluginId: string,
+    sourceDir: string,
+    options?: { removeSourcePath?: boolean; }
+  ) {
+    const directory = this.getDirectoryOf(pluginId);
+    const oldPlugin = this.getDirectoryOf(`${pluginId}-tmp-${Date.now()}`);
+
+    try {
+      if (fs.existsSync(directory)) {
+        fs.renameSync(directory, oldPlugin);
+      }
+    } catch (e) {
+      log.error(`Failed to rename plugin directory ${directory} -> ${oldPlugin}`, e);
+      throw e;
+    }
+
+    try {
+      this.copyDirectory(sourceDir, directory);
+    } catch (e) {
+      // Ressurect the old plugin if the copy failed
+      fs.renameSync(oldPlugin, directory);
+      log.error(`Failed to copy plugin directory ${sourceDir} -> ${directory}`, e);
+      throw e;
+    }
+
+    fs.rmSync(oldPlugin, { recursive: true, force: true });
+
+    if (options.removeSourcePath) {
+      fs.rmSync(sourceDir, { recursive: true, force: true });
+    }
+  }
+
   /** Download plugin source archive to `directory` and extract it */
   async download(
     pluginId: string,
     release: Release,
     options: {
       signal?: AbortSignal;
-      /** for update */
-      tmp?: boolean;
     } = {}
-  ) {
-    const directory = this.getDirectoryOf(pluginId);
-    const mustCleanup = !this.options?.downloadDirectory;
-    const tmpDirectory =
-      this.options?.downloadDirectory ||
-      path.join(tmpdir(), `beekeeper-plugin-${pluginId}-${Date.now()}`);
+  ): Promise<string> {
+    const tmpDirectory = path.join(tmpdir(), `beekeeper-plugin-${pluginId}-${Date.now()}`);
 
     try {
       // Create temp directory for initial download
@@ -127,34 +163,10 @@ export default class PluginFileManager {
       // Extract the archive to the temp directory
       log.debug(`Extracting plugin archive...`);
       await extractArchive(archivePath, tmpDirectory);
-
-      // If we're updating, keep in temp directory
-      if (options.tmp) {
-        return tmpDirectory;
-      }
-
-      // Create final directory
-      fs.mkdirSync(directory, { recursive: true });
-
-      // Copy extracted files to final directory
-      // First remove the archive file to not copy it
-      fs.unlinkSync(archivePath);
-
-      // Copy all files from temp to final directory
-      this.copyDirectory(tmpDirectory, directory);
-
-      // Clean up temp directory
-      if (mustCleanup) {
-        fs.rmSync(tmpDirectory, { recursive: true, force: true });
-      }
+      return tmpDirectory;
     } catch (e) {
       // Clean up on error
-      if (mustCleanup) {
-        fs.rmSync(tmpDirectory, { recursive: true, force: true });
-      }
-      if (!options.tmp) {
-        fs.rmSync(directory, { recursive: true, force: true });
-      }
+      fs.rmSync(tmpDirectory, { recursive: true, force: true });
       log.debug("Download failed", e);
       throw e;
     }

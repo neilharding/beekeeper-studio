@@ -1,9 +1,21 @@
 import type PluginManager from "./PluginManager";
 import type { PluginSnapshot } from "./types";
 
+export type PluginSourcePathParams = {
+  path: string;
+  id: string;
+  cleanupAfterInstall: boolean;
+};
+
 export interface ModuleHookMap {
+  "before-initialize": () => void | Promise<void>;
   "before-install-plugin": (pluginId: string) => void | Promise<void>;
-  "plugin-snapshots": (snapshots: PluginSnapshot[]) => PluginSnapshot[] | Promise<PluginSnapshot[]>;
+  "plugin-snapshots": (
+    snapshots: PluginSnapshot[]
+  ) => PluginSnapshot[] | Promise<PluginSnapshot[]>;
+  "plugin-source": (
+    params: PluginSourcePathParams
+  ) => PluginSourcePathParams | Promise<PluginSourcePathParams>;
 }
 
 export type ModuleHook = {
@@ -30,7 +42,7 @@ export abstract class Module {
    */
   protected hook<K extends keyof ModuleHookMap>(
     name: K,
-    handler: ModuleHookMap[K],
+    handler: ModuleHookMap[K]
   ) {
     this._hooks.push({ name, handler: handler.bind(this) } as ModuleHook);
   }
@@ -38,6 +50,10 @@ export abstract class Module {
   get hooks(): ReadonlyArray<ModuleHook> {
     return this._hooks;
   }
+
+  protected getModule<T extends Module>(cls: ModuleClass<T>): T | undefined {
+    return this.manager.modules.find((module) => module instanceof cls) as T;
+  }
 }
 
-export type ModuleClass = new (options: ModuleOptions) => Module;
+export type ModuleClass<T extends Module> = new (options: ModuleOptions) => T;
