@@ -1,8 +1,11 @@
 import PluginFileManager from "@/services/plugin/PluginFileManager";
 import PluginManager from "@/services/plugin/PluginManager";
-import { createPluginServer } from "./utils/server";
-import { createFileManager, cleanFileManager } from "./utils/fileManager";
-import { MockPluginRepositoryService } from "./utils/registry";
+import { createPluginServer } from "@tests/integration/plugins/utils/server";
+import {
+  createFileManager,
+  cleanFileManager,
+} from "@tests/integration/plugins/utils/fileManager";
+import { MockPluginRepositoryService } from "@tests/integration/plugins/utils/registry";
 import PluginRegistry from "@/services/plugin/PluginRegistry";
 import { TestOrmConnection } from "@tests/lib/TestOrmConnection";
 import migration from "@/migration/20250529_add_plugin_settings";
@@ -66,6 +69,7 @@ describe("Plugin Configuration Module", () => {
     const config = createConfig(`
       [pluginSystem]
       disabled = true
+      allow[] = official-plugin
     `);
 
     it("can prevent network activity", async () => {
@@ -89,7 +93,15 @@ describe("Plugin Configuration Module", () => {
       fetchSpy.mockRestore();
     });
 
-    it("can disable installed plugins", async () => {
+    it.only("can install allowed plugins if they are bundled", async () => {
+      const manager = createPluginManager();
+      manager.registerModule(ConfigurationModule.with({ config }));
+      await manager.initialize();
+      await manager.installPlugin("official-plugin");
+      expect(manager.getPlugins()).resolves.toHaveLength(1);
+    });
+
+    it("can keep allowed plugins enabled while disabling others", async () => {
       const manager = createPluginManager();
       await manager.initialize();
       await manager.installPlugin("official-plugin");
@@ -100,8 +112,17 @@ describe("Plugin Configuration Module", () => {
       await manager2.initialize();
 
       const plugins = await manager2.getPlugins();
-      expect(plugins[0].disableState).toStrictEqual({ disabled: true, reason: "plugin-system-disabled" });
-      expect(plugins[1].disableState).toStrictEqual({ disabled: true, reason: "plugin-system-disabled" });
+      const officialPlugin = plugins.find(
+        (p) => p.manifest.id === "official-plugin"
+      );
+      const communityPlugin = plugins.find(
+        (p) => p.manifest.id === "community-plugin"
+      );
+      expect(officialPlugin.disableState).toStrictEqual({ disabled: false });
+      expect(communityPlugin.disableState).toStrictEqual({
+        disabled: true,
+        reason: "plugin-system-disabled",
+      });
     });
   });
 
@@ -147,10 +168,17 @@ describe("Plugin Configuration Module", () => {
       await manager2.initialize();
 
       const plugins = await manager2.getPlugins();
-      const officialPlugin = plugins.find((p) => p.manifest.id === "official-plugin");
-      const communityPlugin = plugins.find((p) => p.manifest.id === "community-plugin");
+      const officialPlugin = plugins.find(
+        (p) => p.manifest.id === "official-plugin"
+      );
+      const communityPlugin = plugins.find(
+        (p) => p.manifest.id === "community-plugin"
+      );
       expect(officialPlugin.disableState).toStrictEqual({ disabled: false });
-      expect(communityPlugin.disableState).toStrictEqual({ disabled: true, reason: "community-plugins-disabled" });
+      expect(communityPlugin.disableState).toStrictEqual({
+        disabled: true,
+        reason: "community-plugins-disabled",
+      });
     });
   });
 });
