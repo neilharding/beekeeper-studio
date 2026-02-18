@@ -9,6 +9,7 @@ volumes:
   psql14:
   psql13:
   psql15_load_test_data:
+  psql17:
   mariadb:
   cockroachdb:
   oracle18:
@@ -80,6 +81,19 @@ services:
     ports:
       - 5434:5432
 
+  psql17:
+    image: postgres:17
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: saklia
+    volumes:
+      - psql17:/var/lib/postgresql/data
+      - ./dev/docker_psql_init:/docker-entrypoint-initdb.d
+    ports:
+      - 5437:5432
+
   psql14:
     image: postgres:14
     platform: linux/amd64
@@ -129,7 +143,6 @@ services:
   mariadb:
     image: mariadb
     platform: linux/amd64
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: test
@@ -142,7 +155,6 @@ services:
     image: mysql:8.0.21
     platform: linux/amd64
     command: --default-authentication-plugin=mysql_native_password
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: test
@@ -155,7 +167,6 @@ services:
     image: mysql:5.7.22
     platform: linux/amd64
     command: --default-authentication-plugin=mysql_native_password
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: test
@@ -167,7 +178,6 @@ services:
   mysql4.1:
     image: vettadock/mysql-old:4.1
     platform: linux/amd64
-    restart: unless-stopped
     ports:
       - 3309:3306
   sqlserver:
@@ -176,7 +186,6 @@ services:
     volumes:
       - mssql:/var/opt/mssql/data
       - ./dev/docker_sqlserver:/docker_init
-    restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
       MSSSQL_PID: "Express"

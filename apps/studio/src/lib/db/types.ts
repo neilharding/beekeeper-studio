@@ -1,4 +1,4 @@
-import { CancelableQuery, DatabaseFilterOptions, ExtendedTableColumn, FilterOptions, ImportFuncOptions, NgQueryResult, OrderBy, PrimaryKeyColumn, Routine, SchemaFilterOptions, StreamResults, SupportedFeatures, TableChanges, TableColumn, TableFilter, TableIndex, TableInsert, TableOrView, TablePartition, TableProperties, TableResult, TableTrigger, TableUpdateResult } from './models';
+import { CancelableQuery, DatabaseFilterOptions, ExtendedTableColumn, FilterOptions, ImportFuncOptions, NgQueryResult, OrderBy, PrimaryKeyColumn, Routine, SchemaFilterOptions, ServerStatistics, StreamResults, SupportedFeatures, TableChanges, TableColumn, TableFilter, TableIndex, TableInsert, TableOrView, TablePartition, TableProperties, TableResult, TableTrigger, TableUpdateResult } from './models';
 import { AlterPartitionsSpec, AlterTableSpec, CreateTableSpec, IndexAlterations, RelationAlterations, TableKey } from '@shared/lib/dialects/models';
 
 export const DatabaseTypes = ['sqlite', 'sqlserver', 'redshift', 'cockroachdb', 'mysql', 'postgresql', 'mariadb', 'cassandra', 'oracle', 'bigquery', 'firebird', 'tidb', 'libsql', 'clickhouse', 'duckdb', 'mongodb', 'sqlanywhere', 'surrealdb', 'redis', 'trino'] as const
@@ -35,17 +35,19 @@ export const keymapTypes = [
 
 // if you update this, you may need to update `translateOperator` in the mongodb driver
 export const TableFilterSymbols = [
-  { value: '=', label: 'equals' },
-  { value: '!=', label: 'does not equal'},
-  { value: 'like', label: 'like' },
-  { value: 'not like', label: 'not like' },
-  { value: '<', label: 'less than' },
-  { value: '<=', label: 'less than or equal' },
-  { value: '>', label: 'greater than'},
-  { value: ">=", label: "greater than or equal" },
-  { value: "in", label: 'in', arrayInput: true },
-  { value: "is", label: "is null", nullOnly: true },
-  { value: "is not", label: "is not null", nullOnly: true }
+    { value: '=', label: 'equals', type: 'standard' },
+    { value: '!=', label: 'does not equal', type: 'standard'},
+    { value: 'like', label: 'like', type: 'standard' },
+    { value: 'not like', label: 'not like', type: 'standard' },
+    { value: 'ilike', label: 'ilike', type: 'ilike' },
+    { value: 'not ilike', label: 'not ilike', type: 'ilike' },
+    { value: '<', label: 'less than', type: 'standard' },
+    { value: '<=', label: 'less than or equal', type: 'standard' },
+    { value: '>', label: 'greater than', type: 'standard'},
+    { value: ">=", label: "greater than or equal", type: 'standard' },
+    { value: "in", label: 'in', arrayInput: true, type: 'standard' },
+    { value: "is", label: "is null", nullOnly: true, type: 'standard' },
+    { value: "is not", label: "is not null", nullOnly: true, type: 'standard' }
 ]
 
 export enum AzureAuthType {
@@ -53,12 +55,20 @@ export enum AzureAuthType {
   Password,
   AccessToken,
   MSIVM,
-  ServicePrincipalSecret
+  ServicePrincipalSecret,
+  CLI
+}
+
+export enum IamAuthType {
+  Key = 'iam_key',
+  File = 'iam_file',
+  CLI = 'iam_cli'
 }
 
 export const IamAuthTypes = [
-  { name: 'IAM Authentication Using Access Key and Secret Key', value: 'iam_key' },
-  { name: 'IAM Authentication Using Credentials File', value: 'iam_file' }
+  { name: 'IAM Authentication Using Access Key and Secret Key', value: IamAuthType.Key },
+  { name: 'IAM Authentication Using Credentials File', value: IamAuthType.File },
+  { name: 'AWS CLI Authentication', value: IamAuthType.CLI }
 ]
 
 // supported auth types that actually work :roll_eyes: default i'm looking at you
@@ -68,20 +78,25 @@ export const AzureAuthTypes = [
   { name: 'Azure AD SSO', value: AzureAuthType.AccessToken },
   // This may be reactivated when we move to client server architecture
   // { name: 'MSI VM', value: AzureAuthType.MSIVM },
-  { name: 'Azure Service Principal Secret', value: AzureAuthType.ServicePrincipalSecret }
+  { name: 'Azure Service Principal Secret', value: AzureAuthType.ServicePrincipalSecret },
+  { name: 'Azure CLI Authentication', value: AzureAuthType.CLI }
 ];
 
 export interface RedshiftOptions {
+  clusterIdentifier?: string;
+  databaseGroup?: string;
+  tokenDurationSeconds?: number;
+  isServerless?: boolean;
+}
+
+export interface IamAuthOptions {
   awsProfile?: string
   iamAuthenticationEnabled?: boolean
   accessKeyId?: string;
   secretAccessKey?: string;
   awsRegion?: string;
-  clusterIdentifier?: string;
-  databaseGroup?: string;
-  tokenDurationSeconds?: number;
-  isServerless?: boolean;
-  authType?: string;
+  authType?: IamAuthType;
+  cliPath?: string;
 }
 
 export interface CassandraOptions {
@@ -100,6 +115,7 @@ export interface AzureAuthOptions {
   tenantId?: string;
   clientSecret?: string;
   msiEndpoint?: string;
+  cliPath?: string;
 }
 export interface LibSQLOptions {
   mode: 'url' | 'file';
@@ -134,9 +150,11 @@ export const SurrealAuthTypes = [
   { name: 'Root', value: SurrealAuthType.Root },
   { name: 'Namespace', value: SurrealAuthType.Namespace },
   { name: 'Database', value: SurrealAuthType.Database },
-  { name: 'Record Access', value: SurrealAuthType.RecordAccess },
+  // NOTE (@day): disabling for now, as will take a bit more work
+  // { name: 'Record Access', value: SurrealAuthType.RecordAccess },
   { name: 'Token', value: SurrealAuthType.Token },
-  { name: 'Anonymous', value: SurrealAuthType.Anonymous }
+  // NOTE (@day): this doesn't seem to do anything? Won't be able to access tables or query data
+  // { name: 'Anonymous', value: SurrealAuthType.Anonymous }
 ];
 
 
@@ -194,6 +212,7 @@ export interface IDbConnectionServerConfig {
   oracleConfigLocation?: string
   options?: any
   redshiftOptions?: RedshiftOptions
+  iamAuthOptions?: IamAuthOptions
   cassandraOptions?: CassandraOptions
   bigQueryOptions?: BigQueryOptions
   azureAuthOptions?: AzureAuthOptions
@@ -229,7 +248,7 @@ export interface IBasicDatabaseClient {
   getTableKeys(table: string, schema?: string): Promise<TableKey[]>,
   listTablePartitions(table: string, schema?: string): Promise<TablePartition[]>,
   executeCommand(commandText: string): Promise<NgQueryResult[]>,
-  query(queryText: string, options?: any): Promise<CancelableQuery>,
+  query(queryText: string, tabId: number, options?: any): Promise<CancelableQuery>,
   executeQuery(queryText: string, options?: any): Promise<NgQueryResult[]>,
   listDatabases(filter?: DatabaseFilterOptions): Promise<string[]>,
   getTableProperties(table: string, schema?: string): Promise<TableProperties | null>,
@@ -266,7 +285,7 @@ export interface IBasicDatabaseClient {
   truncateAllTables(schema?: string): Promise<void>
 
 
-  getTableLength(table: string, schema?: string): Promise<number>,
+  getTableLength(table?: string, schema?: string): Promise<number>,
   selectTop(table: string, offset: number, limit: number, orderBy: OrderBy[], filters: string | TableFilter[], schema?: string, selects?: string[]): Promise<TableResult>,
   selectTopSql(table: string, offset: number, limit: number, orderBy: OrderBy[], filters: string | TableFilter[], schema?: string, selects?: string[]): Promise<string>,
   selectTopStream(table: string, orderBy: OrderBy[], filters: string | TableFilter[], chunkSize: number, schema?: string): Promise<StreamResults>
@@ -279,6 +298,8 @@ export interface IBasicDatabaseClient {
   getInsertQuery(tableInsert: TableInsert, runAsUpsert?: boolean): Promise<string>
   syncDatabase(): Promise<void>
 
+  getServerStatistics(): Promise<ServerStatistics | null>
+
   importStepZero(table: TableOrView): Promise<any>
   importBeginCommand(table: TableOrView, importOptions?: ImportFuncOptions): Promise<any>
   importTruncateCommand (table: TableOrView, importOptions?: ImportFuncOptions): Promise<any>
@@ -289,4 +310,5 @@ export interface IBasicDatabaseClient {
 
   /** Returns a query for the given filter */
   getQueryForFilter(filter: TableFilter): Promise<string>
+  getFilteredDataCount(table: string, schema: string | null, filter: string ): Promise<string>
 }

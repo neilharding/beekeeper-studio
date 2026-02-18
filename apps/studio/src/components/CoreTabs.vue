@@ -85,7 +85,8 @@
           :active="activeTab?.id === tab.id"
           :tab="tab"
           :tab-id="tab.id"
-        />
+          @update-tab="updateTab"
+         />
         <Shell
           v-if="tab.tabType === 'shell'"
           :active="activeTab?.id === tab.id"
@@ -397,9 +398,9 @@ export default Vue.extend({
     ...mapState(['selectedSidebarItem']),
     ...mapState('tabs', { 'activeTab': 'active', 'tabs': 'tabs' }),
     ...mapState(['connection', 'connectionType', 'usedConfig']),
-    ...mapGetters({ 
-       'dialect': 'dialect', 
-       'dialectData': 'dialectData', 
+    ...mapGetters({
+       'dialect': 'dialect',
+       'dialectData': 'dialectData',
        'dialectTitle': 'dialectTitle',
        'newTabDropdownItems': 'tabs/newTabDropdownItems',
     }),
@@ -493,6 +494,10 @@ export default Vue.extend({
     this.$root.$refs.CoreTabs = this;
   },
   methods: {
+    async updateTab(tab: TransportOpenTab) {
+      const newTab = Object.assign({}, tab);
+      await this.$store.commit('tabs/replaceTab', newTab);
+    },
     showUpgradeModal() {
       this.$root.$emit(AppEvent.upgradeModal)
     },
@@ -707,19 +712,24 @@ export default Vue.extend({
       result.unsavedChanges = false;
       await this.addTab(result);
     },
-    async createQuery(optionalText, queryTitle?) {
-      // const text = optionalText ? optionalText : ""
-      console.log("Creating tab")
-      let qNum = 0
-      let tabName = "New Query"
+    getNextQueryTitle(queryTitle?) {
+      let qNum = 0;
+      let tabName = "New Query";
       if (queryTitle) {
         tabName = queryTitle
       } else {
         do {
-          qNum = qNum + 1
-          tabName = `Query #${qNum}`
+          qNum = qNum + 1;
+          tabName = `Query #${qNum}`;
         } while (this.tabItems.filter((t) => t.title === tabName).length > 0);
       }
+
+      return tabName;
+    },
+    async createQuery(optionalText, queryTitle?) {
+      // const text = optionalText ? optionalText : ""
+      console.log("Creating tab")
+      const tabName = this.getNextQueryTitle(queryTitle);
 
       const result = {} as TransportOpenTab;
       result.tabType = 'query'
@@ -1052,6 +1062,8 @@ export default Vue.extend({
       if(tab) this.setActiveTab(tab)
     },
     async close(tab: TransportOpenTab, options?: CloseTabOptions) {
+      if (this.closingTab) return; // prevent close modals queueing
+  
       if (tab.unsavedChanges && !options?.ignoreUnsavedChanges) {
         this.closingTab = tab
         const confirmed = await this.$confirmById(this.confirmModalId);
@@ -1079,13 +1091,15 @@ export default Vue.extend({
         this.$store.commit('selectSidebarItem', null);
       }
     },
-    async forceClose(tab: TransportOpenTab) {
+    async forceClose(tab: TransportOpenTab): Promise<void> {
       // ensure the tab is active
       this.$store.dispatch('tabs/setActive', tab);
       switch (tab.tabType) {
         case 'backup':
         case 'restore':
           break;
+        case 'query':
+          return this.close(tab, { ignoreUnsavedChanges: true });
         default:
           console.log('No force close behaviour defined for tab type')
       }
@@ -1161,8 +1175,19 @@ export default Vue.extend({
       this.addTab(tab)
 
     },
-    createQueryFromItem(item) {
-      this.createQuery(item.text ?? item.unsavedQueryText, item.title ?? null)
+    async createQueryFromItem(item) {
+      const tab = {} as TransportOpenTab;
+      tab.tabType = 'query';
+      tab.title = this.getNextQueryTitle();
+      if (item.id) {
+        tab.usedQueryId = item.id;
+      }
+      tab.unsavedChanges = false;
+
+      const existing = this.tabItems.find((t) => matches(t, tab))
+      if (existing) return this.$store.dispatch('tabs/setActive', existing)
+
+      this.addTab(tab);
     },
     copyName(item) {
       if (item.tabType !== 'table' && item.tabType !== "table-properties") return;

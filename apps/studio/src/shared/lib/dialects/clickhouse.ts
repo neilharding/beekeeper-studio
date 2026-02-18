@@ -93,9 +93,11 @@ export const ClickHouseData: DialectData = {
     }
   ],
   disabledFeatures: {
+    manualCommit: true,
     shell: true,
     triggers: true,
     compositeKeys: true,
+    foreignKeys: true,
     createIndex: true,
     generatedColumns: true,
     alter: {

@@ -157,6 +157,20 @@ CREATE table foo("myColumn" int);
 
 See [this StackOverflow answer](https://stackoverflow.com/a/20880247/18818) or [this section in the PostgreSQL manual](https://www.postgresql.org/docs/current/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS)
 
+## Linux (Wayland)
+
+### Weird colors on Wayland (wrong saturation, contrast, or readability)
+
+If colors look wrong when running Beekeeper Studio on Wayland — for example oranges appearing yellow, greys looking almost black, whites being overly bright, or text being hard to read — this is caused by a [Chromium/Electron bug with the Wayland color management protocol](https://github.com/electron/electron/issues/49566).
+
+To fix this, add the following flag to your `~/.config/bks-flags.conf` file:
+
+```bash
+echo "--disable-features=WaylandWpColorManagerV1" >> ~/.config/bks-flags.conf
+```
+
+Then restart Beekeeper Studio. See [Linux Installation - Wayland support](../installation/linux.md#wayland-support-including-fractional-scaling) for more details on configuring Wayland flags.
+
 ## Linux (Snap)
 
 ### The Filepicker shows 'little rectangles' instead of a font
@@ -175,4 +189,9 @@ See for reference:
 - [Filed bug with snapd](https://bugs.launchpad.net/snappy/+bug/1916816)
 - [Discussion on snapcraft forums](https://forum.snapcraft.io/t/snap-store-fonts-on-arch-linux-are-merely-empty-rectangles/15373/9)
 
+## Windows
 
+### The App is stuck running in the background
+If you've just recently installed the app on Windows and the app refuses to start (with your task manager reporting that it is running), you may need to install the [MSVC Redistributables](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170) for your architecture.
+
+This is an issue with one of our native dependencies, and we are working on a more permanent fix for this issue in the installer.

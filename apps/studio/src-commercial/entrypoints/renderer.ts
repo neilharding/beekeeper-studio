@@ -114,17 +114,26 @@ import ProductTourPlugin from '@/plugins/ProductTourPlugin'
     Vue.mixin({
       methods: {
         ctrlOrCmd(key) {
-          if (this.$config.isMac) return `meta+${key}`
-          return `ctrl+${key}`
+          const keys = key.split('+');
+          // First letter is uppercase
+          key = keys.map(k => _.upperFirst(k)).join('+');
+          if (this.$config.isMac) return `Meta+${key}`
+          return `Ctrl+${key}`
         },
         // codemirror sytax
         cmCtrlOrCmd(key: string) {
+          const keys = key.split('-');
+          // First letter is uppercase
+          key = keys.map(k => k.charAt(0).toUpperCase() + k.slice(1)).join('-');
           if (this.$config.isMac) return `Cmd-${key}`
           return `Ctrl-${key}`
         },
         ctrlOrCmdShift(key) {
-          if (this.$config.isMac) return `meta+shift+${key}`
-          return `ctrl+shift+${key}`
+          const keys = key.split('+');
+          // First letter is uppercase
+          key = keys.map(k => k.charAt(0).toUpperCase() + k.slice(1)).join('+');
+          if (this.$config.isMac) return `Meta+Shift+${key}`
+          return `Ctrl+Shift+${key}`
         },
         selectChildren(element) {
           const selection = window.getSelection()
@@ -146,7 +155,9 @@ import ProductTourPlugin from '@/plugins/ProductTourPlugin'
     Vue.config.productionTip = false
     Vue.use(VueHotkey, {
       "pageup": 33,
-      "pagedown": 34
+      "pagedown": 34,
+      "numadd": 107,
+      "numsub": 109
     })
     Vue.use(VTooltip, { defaultHtml: false, })
     Vue.use(VModal)
@@ -187,15 +198,18 @@ import ProductTourPlugin from '@/plugins/ProductTourPlugin'
     const handler = new AppEventHandler(app)
     handler.registerCallbacks()
     await store.dispatch('initRootStates')
-    const webPluginManager = new WebPluginManager(
-      Vue.prototype.$util,
-      new PluginStoreService(store, {
+    const webPluginManager = new WebPluginManager({
+      utilityConnection: Vue.prototype.$util,
+      pluginStore: new PluginStoreService(store, {
         emit: (...args) => app.$root.$emit(...args),
         on: (...args) => app.$root.$on(...args),
         off: (...args) => app.$root.$off(...args),
       }),
-      window.platformInfo.appVersion
-    )
+      appVersion: window.platformInfo.appVersion,
+      fileHelpers: window.main.fileHelpers,
+      noty: Vue.prototype.$noty,
+      confirm: app.$confirm.bind(app),
+    });
     webPluginManager.initialize().then(() => {
       store.commit("webPluginManagerStatus", "ready")
     }).catch((e) => {
