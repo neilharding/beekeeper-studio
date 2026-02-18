@@ -5298,12 +5298,12 @@
   dependencies:
     "@babel/types" "^7.20.7"
 
-"@types/better-sqlite3@^5.4.1":
-  version "5.4.3"
-  resolved "https://registry.yarnpkg.com/@types/better-sqlite3/-/better-sqlite3-5.4.3.tgz#4f1142c02db111627d9c5792f8aa349fcf46d100"
-  integrity sha512-d4T8Htgz3sQL3u5oVwkWipZLBYUooKEA4fhU9Sp4F6VDIhifQo1NR/IDtnAIID0Y9IXV3TQnNhv6S+m8TnkEdg==
+"@types/better-sqlite3@^7.6.13":
+  version "7.6.13"
+  resolved "https://registry.yarnpkg.com/@types/better-sqlite3/-/better-sqlite3-7.6.13.tgz#a72387f00d2f53cab699e63f2e2c05453cf953f0"
+  integrity sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==
   dependencies:
-    "@types/integer" "*"
+    "@types/node" "*"
 
 "@types/bytes@^3.1.0":
   version "3.1.5"
@@ -5389,11 +5389,6 @@
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@types/ini/-/ini-4.1.1.tgz#6984664a8cc74c3348f4049d0bf2b1ab2d061ca3"
   integrity sha512-MIyNUZipBTbyUNnhvuXJTY7B6qNI78meck9Jbv3wk0OgNwRyOOVEKDutAkOs1snB/tx0FafyR6/SN4Ps0hZPeg==
-
-"@types/integer@*":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@types/integer/-/integer-4.0.3.tgz#70be7360e423462bd9225c5aac4106f9c0433c0c"
-  integrity sha512-79TuNOotyLWioEzmKPT5m3jxZ3fm5336D0mqrho6oedAR93QxDfIEAgSq5UoNErgt45w0Kpwv0Hv9i/rq7UV6A==
 
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0", "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.6"
@@ -6581,16 +6576,16 @@ axios-retry@^3.2.4:
     "@babel/runtime" "^7.15.4"
     is-retry-allowed "^2.2.0"
 
-axios@1.11.0:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.11.0.tgz#c2ec219e35e414c025b2095e8b8280278478fdb6"
-  integrity sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==
+axios@1.13.2:
+  version "1.13.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.2.tgz#9ada120b7b5ab24509553ec3e40123521117f687"
+  integrity sha512-VPk9ebNqPcy5lRGuSlKx752IlDatOjT9paPlm8A7yOuW2Fbvp4X3JznJtT4f0GzGLLiWE9W8onz51SqLYwzGaA==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.4"
     proxy-from-env "^1.1.0"
 
-axios@^1.13.5:
+axios@^1.0.0:
   version "1.13.5"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.5.tgz#5e464688fa127e11a660a2c49441c009f6567a43"
   integrity sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==
@@ -6804,9 +6799,9 @@ before-after-hook@^3.0.2:
   integrity sha512-Nik3Sc0ncrMK4UUdXQmAnRtzmNQTAAXmXIopizwZ1W1t8QmfJj+zL4OA2I7XPTPW5z5TDqv4hRo/JzouDJnX3A==
 
 better-sqlite3@^12.5.0:
-  version "12.5.0"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-12.5.0.tgz#c570873d9635b5d56baa52f7e72634c2c589f35f"
-  integrity sha512-WwCZ/5Diz7rsF29o27o0Gcc1Du+l7Zsv7SYtVPG0X3G/uUI1LqdxrQI7c9Hs2FWpqXXERjW9hp6g3/tH7DlVKg==
+  version "12.6.2"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-12.6.2.tgz#770649f28a62e543a360f3dfa1afe4cc944b1937"
+  integrity sha512-8VYKM3MjCa9WcaSAI3hzwhmyHVlH8tiGFwf0RlTsZPWJ1I5MkzjiudCo4KC4DxOaL/53A5B1sI/IbldNFDbsKA==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^7.1.1"
@@ -14797,12 +14792,12 @@ tree-kill@^1.2.2:
   resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.2.tgz#4ca09a9092c88b73a7cdc5e8a01b507b0790a0cc"
   integrity sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==
 
-trino-client@^0.2.7:
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/trino-client/-/trino-client-0.2.8.tgz#49cb1393bf32bf7a1834a4509ab5b4290c217209"
-  integrity sha512-56QzPQ18WALVFoFxtU5GgfqzezKyGrfEHkoLrpG2LSIsZix4E7SwzKf1yYIYAlj78gwioB7eRt50ZqoWvYg/9g==
+trino-client@^0.2.0:
+  version "0.2.9"
+  resolved "https://registry.yarnpkg.com/trino-client/-/trino-client-0.2.9.tgz#0f5dbdb920177402cb1a614c4bfda6e3a1bf56af"
+  integrity sha512-bINcQxDH5v9DR1zqXtoNqnRJ5leYMyYzRuFZLsoqg4irWYPDh/4wBndC8c2x+QfNIOr6c35BtHKOwotelqSATg==
   dependencies:
-    axios "1.11.0"
+    axios "1.13.2"
 
 truncate-utf8-bytes@^1.0.0:
   version "1.0.2"
