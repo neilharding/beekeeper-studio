@@ -53,6 +53,7 @@ export default {
       libsqlOptions: config.libsqlOptions,
       sqlAnywhereOptions: config.sqlAnywhereOptions,
       surrealDbOptions: config.surrealDbOptions,
+      athenaOptions: config.athenaOptions,
       runtimeExtensions: sqliteExtension ? sqliteExtension as string[] : []
     }
   },

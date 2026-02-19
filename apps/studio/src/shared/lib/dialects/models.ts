@@ -33,6 +33,8 @@ export function dialectFor(s: string): Dialect | null {
       return 'mysql'
     case 'libsql':
       return 'sqlite'
+    case 'athena':
+      return 'trino'
     case 'mssql':
       return 'sqlserver'
     default:
