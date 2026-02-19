@@ -100,7 +100,7 @@ export default Vue.extend({
               <div class="noty-onboarding-body">
                 Double click the demo database to explore app features,
                 watch our <a class="link" href="https://docs.beekeeperstudio.io">60s quickstart video</a>,
-                or read the <a class="link" href="https://docs.beekeeperstudio.io">getting started guide</a>.
+                or read the <a class="link" href="https://docs.beekeeperstudio.io/getting-started-guide/">getting started guide</a>.
               </div>`,
         closeWith: ['button'],
         layout: 'bottomRight',
