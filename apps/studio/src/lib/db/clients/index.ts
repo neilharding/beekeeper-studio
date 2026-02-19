@@ -266,5 +266,24 @@ export const CLIENTS: ClientConfig[] = [
       'scriptCreateTable',
       'cancelQuery'
     ],
+  },
+  {
+    key: 'athena',
+    name: 'Amazon Athena',
+    defaultPort: 443,
+    disabledFeatures: [
+      'server:ssl',
+      'server:host',
+      'server:port',
+      'server:socketPath',
+      'server:socketPathWithCustomPort',
+      'server:user',
+      'server:password',
+      'server:schema',
+      'server:domain',
+      'server:ssh',
+      'scriptCreateTable',
+      'cancelQuery',
+    ],
   }
 ];
