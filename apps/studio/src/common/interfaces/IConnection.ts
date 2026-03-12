@@ -59,6 +59,8 @@ export interface ISimpleConnection extends Transport {
   sqlAnywhereOptions?: SQLAnywhereOptions
   surrealDbOptions?: SurrealDBOptions
   athenaOptions?: AthenaOptions
+  connectionFolderId?: Nullable<number>
+  position?: number
 }
 
 export interface IConnection extends ISimpleConnection {

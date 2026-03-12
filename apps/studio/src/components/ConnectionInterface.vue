@@ -200,6 +200,9 @@
                 <SaveConnectionForm
                   v-if="!shouldUpsell"
                   :config="config"
+                  :folders="connectionFolders"
+                  :is-ultimate="isUltimate"
+                  :is-cloud="isCloud"
                   @save="save"
                 />
               </div>
@@ -301,7 +304,8 @@ export default Vue.extend({
     ...mapState(['workspaceId', 'connection']),
     ...mapState(['username']),
     ...mapState('data/connections', { 'connections': 'items' }),
-    ...mapGetters(['isUltimate']),
+    ...mapState('data/connectionFolders', { connectionFolders: 'items' }),
+    ...mapGetters(['isUltimate', 'isCloud']),
     ...mapGetters('licenses', ['isTrial', 'trialLicense']),
     ...mapGetters({
       'usedConfigs': 'data/usedconnections/orderedUsedConfigs',
